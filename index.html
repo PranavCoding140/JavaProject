@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ten Questions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Ten Questions</h1>
+
+    <!-- Screen 1: user enters topic -->
+    <div id="setup">
+      <p>Enter any topic and get a 10-question quiz.</p>
+      <label for="topic">Topic</label>
+      <input type="text" id="topic" placeholder="e.g. Operating system scheduling">
+
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+
+      <button id="startBtn">Generate Quiz</button>
+    </div>
+
+    <!-- Screen 2: waiting message -->
+    <div id="loading" class="hidden">
+      <p>Writing your questions... please wait.</p>
+    </div>
+
+    <!-- Screen 3: the quiz -->
+    <div id="quiz" class="hidden">
+      <p id="count"></p>
+      <h2 id="question"></h2>
+      <div id="options"></div>
+      <p id="explanation"></p>
+      <button id="next" class="hidden">Next</button>
+    </div>
+
+    <!-- Screen 4: final score -->
+    <div id="result" class="hidden">
+      <h2 id="scoreText"></h2>
+      <button id="restart">Try Another Quiz</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
