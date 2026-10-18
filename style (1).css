@@ -1,0 +1,64 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f4f8;
+  margin: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 15px;
+  background-color: #2c7be5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background-color: #e9ecef;
+  color: black;
+  text-align: left;
+}
+
+.right {
+  background-color: #28a745;
+  color: white;
+}
+
+.wrong {
+  background-color: #dc3545;
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
