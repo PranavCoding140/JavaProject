@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ten Questions</title>
+  <style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f4f8;
+  margin: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 15px;
+  background-color: #2c7be5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background-color: #e9ecef;
+  color: black;
+  text-align: left;
+}
+
+.right {
+  background-color: #28a745;
+  color: white;
+}
+
+.wrong {
+  background-color: #dc3545;
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ten Questions</h1>
+
+    <!-- Screen 1: choose a topic -->
+    <div id="setup">
+      <p>Choose a topic and answer 10 multiple choice questions.</p>
+      <label for="topic">Topic</label>
+      <select id="topic">
+        <option value="Java">Java Programming</option>
+        <option value="OS">Operating Systems</option>
+        <option value="DBMS">DBMS</option>
+      </select>
+      <button id="startBtn">Start Quiz</button>
+    </div>
+
+    <!-- Screen 2: the quiz -->
+    <div id="quiz" class="hidden">
+      <p id="count"></p>
+      <h2 id="question"></h2>
+      <div id="options"></div>
+      <p id="explanation"></p>
+      <button id="next" class="hidden">Next</button>
+    </div>
+
+    <!-- Screen 3: final score -->
+    <div id="result" class="hidden">
+      <h2 id="scoreText"></h2>
+      <button id="restart">Try Another Quiz</button>
+    </div>
+  </div>
+
+  <script>
+// ---------- Question bank (stored directly in the code) ----------
+// answer = index (0 to 3) of the correct option
+var quizData = {
+  Java: [
+    {q: "Which keyword is used to create an object in Java?", options: ["new", "create", "make", "object"], answer: 0, explanation: "The new keyword allocates memory and calls the constructor."},
+    {q: "What is the default value of an int instance variable?", options: ["null", "0", "1", "undefined"], answer: 1, explanation: "Numeric instance variables are automatically set to 0."},
+    {q: "Which of these is NOT a primitive data type?", options: ["int", "char", "String", "boolean"], answer: 2, explanation: "String is a class (reference type), not a primitive."},
+    {q: "Which keyword stops a class from being inherited?", options: ["static", "final", "private", "abstract"], answer: 1, explanation: "A final class cannot be extended."},
+    {q: "What is method overloading?", options: ["Same method name with different parameters", "Same name and parameters in a subclass", "Two classes with the same name", "A method calling itself"], answer: 0, explanation: "Overloading is compile-time polymorphism: same name, different parameter lists."},
+    {q: "Which collection does NOT allow duplicate elements?", options: ["ArrayList", "LinkedList", "HashSet", "Vector"], answer: 2, explanation: "A Set stores only unique elements."},
+    {q: "Which is the correct signature of the main method?", options: ["public void main()", "public static void main(String[] args)", "static main(String args)", "void main(String[] args)"], answer: 1, explanation: "The JVM looks for exactly this signature to start a program."},
+    {q: "Which keyword is used to inherit a class?", options: ["implements", "inherits", "extends", "super"], answer: 2, explanation: "extends is for class inheritance; implements is for interfaces."},
+    {q: "Which exception occurs when an array index is out of range?", options: ["ArithmeticException", "NullPointerException", "ArrayIndexOutOfBoundsException", "ClassCastException"], answer: 2, explanation: "Accessing an invalid index throws ArrayIndexOutOfBoundsException."},
+    {q: "What does the JVM do?", options: ["Compiles source code to machine code", "Executes Java bytecode", "Edits Java programs", "Stores Java files"], answer: 1, explanation: "javac makes bytecode; the JVM runs that bytecode on any platform."}
+  ],
+  OS: [
+    {q: "Which part is the core of an operating system?", options: ["Shell", "Kernel", "Compiler", "BIOS"], answer: 1, explanation: "The kernel manages CPU, memory and devices."},
+    {q: "Which scheduling algorithm picks the process with the smallest CPU burst?", options: ["FCFS", "Round Robin", "SJF", "LRU"], answer: 2, explanation: "Shortest Job First gives the minimum average waiting time."},
+    {q: "Which is a necessary condition for deadlock?", options: ["Mutual exclusion", "Multitasking", "Paging", "Spooling"], answer: 0, explanation: "The four conditions are mutual exclusion, hold and wait, no preemption and circular wait."},
+    {q: "Round Robin scheduling uses a fixed...", options: ["Time quantum", "Page size", "Burst priority", "Semaphore"], answer: 0, explanation: "Each process runs for one time quantum, then goes to the back of the queue."},
+    {q: "What is virtual memory?", options: ["Makes the CPU faster", "Uses disk space to extend usable memory", "Encrypts memory", "Deletes unused processes"], answer: 1, explanation: "Parts of programs are kept on disk and loaded into RAM when needed."},
+    {q: "Which of these is a page replacement algorithm?", options: ["LRU", "SJF", "SCAN", "FCFS"], answer: 0, explanation: "Least Recently Used replaces the page not used for the longest time."},
+    {q: "What is thrashing?", options: ["Very high CPU usage", "Excessive paging that lowers CPU utilisation", "A process finishing early", "Disk failure"], answer: 1, explanation: "The system spends more time swapping pages than executing."},
+    {q: "What is a semaphore used for?", options: ["Process synchronisation", "Compiling code", "Printing files", "Memory allocation"], answer: 0, explanation: "A semaphore is an integer variable that controls access to shared resources."},
+    {q: "A process in the ready state is...", options: ["Waiting for I/O", "Waiting to be given the CPU", "Running on the CPU", "Finished execution"], answer: 1, explanation: "Ready means it has everything except the CPU."},
+    {q: "Which scheduling algorithm is non-preemptive?", options: ["Round Robin", "SRTF", "FCFS", "Preemptive priority"], answer: 2, explanation: "In FCFS a process keeps the CPU until it finishes or blocks."}
+  ],
+  DBMS: [
+    {q: "What does SQL stand for?", options: ["Structured Query Language", "Simple Query Logic", "Sequential Query Language", "Standard Question List"], answer: 0, explanation: "SQL is the standard language for relational databases."},
+    {q: "What does a primary key do?", options: ["Stores large files", "Uniquely identifies each row", "Sorts the table", "Links two databases"], answer: 1, explanation: "Primary key values are unique and cannot be NULL."},
+    {q: "Which command removes a table along with its structure?", options: ["TRUNCATE", "DELETE", "DROP", "UPDATE"], answer: 2, explanation: "DROP deletes the whole table; DELETE removes only rows."},
+    {q: "What is the purpose of normalization?", options: ["Increase redundancy", "Reduce redundancy and anomalies", "Make queries slower", "Encrypt data"], answer: 1, explanation: "Normalization splits tables to avoid duplicate data and update problems."},
+    {q: "What does the 'A' in ACID stand for?", options: ["Atomicity", "Accuracy", "Availability", "Authorisation"], answer: 0, explanation: "Atomicity means a transaction happens completely or not at all."},
+    {q: "What is a foreign key?", options: ["Uniquely identifies its own table", "Refers to a primary key in another table", "Sorts rows", "Deletes duplicates"], answer: 1, explanation: "Foreign keys create relationships between tables."},
+    {q: "Which clause filters groups created by GROUP BY?", options: ["WHERE", "ORDER BY", "HAVING", "LIMIT"], answer: 2, explanation: "WHERE filters rows before grouping; HAVING filters groups after."},
+    {q: "Which join returns only rows that match in both tables?", options: ["INNER JOIN", "FULL OUTER JOIN", "LEFT JOIN", "CROSS JOIN"], answer: 0, explanation: "INNER JOIN keeps only matching rows."},
+    {q: "First Normal Form (1NF) requires...", options: ["Atomic (indivisible) column values", "No primary key", "All columns numeric", "Only one column"], answer: 0, explanation: "Each cell must hold a single value, with no repeating groups."},
+    {q: "Which of these is a DDL command?", options: ["SELECT", "CREATE", "INSERT", "UPDATE"], answer: 1, explanation: "DDL (Data Definition Language) defines structure: CREATE, ALTER, DROP."}
+  ]
+};
+
+// ---------- Global variables ----------
+var questions = [];   // the 10 questions of the chosen topic
+var current = 0;      // index of the question being shown
+var score = 0;        // number of correct answers
+
+// ---------- Show only one screen at a time ----------
+function show(id) {
+  var screens = ["setup", "quiz", "result"];
+  for (var i = 0; i < screens.length; i++) {
+    document.getElementById(screens[i]).classList.add("hidden");
+  }
+  document.getElementById(id).classList.remove("hidden");
+}
+
+// ---------- Shuffle an array (Fisher-Yates) so the order is different every time ----------
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  return arr;
+}
+
+// ---------- Start the quiz ----------
+function startQuiz() {
+  var topic = document.getElementById("topic").value;
+  questions = shuffle(quizData[topic].slice());  // slice() makes a copy so the original is untouched
+  current = 0;
+  score = 0;
+  showQuestion();
+  show("quiz");
+}
+
+// ---------- Display one question ----------
+function showQuestion() {
+  var q = questions[current];
+
+  document.getElementById("count").textContent =
+      "Question " + (current + 1) + " of " + questions.length;
+  document.getElementById("question").textContent = q.q;
+  document.getElementById("explanation").textContent = "";
+  document.getElementById("next").classList.add("hidden");
+
+  var box = document.getElementById("options");
+  box.innerHTML = "";   // remove old buttons
+
+  q.options.forEach(function (optionText, index) {
+    var btn = document.createElement("button");
+    btn.textContent = optionText;
+    btn.className = "option";
+    btn.onclick = function () {
+      checkAnswer(index);
+    };
+    box.appendChild(btn);
+  });
+}
+
+// ---------- Check the chosen answer ----------
+function checkAnswer(chosen) {
+  var q = questions[current];
+  var buttons = document.querySelectorAll(".option");
+
+  buttons.forEach(function (b) {
+    b.disabled = true;   // stop further clicks
+  });
+
+  buttons[q.answer].classList.add("right");   // correct answer in green
+
+  if (chosen === q.answer) {
+    score++;
+  } else {
+    buttons[chosen].classList.add("wrong");   // wrong choice in red
+  }
+
+  document.getElementById("explanation").textContent = q.explanation;
+
+  var nextBtn = document.getElementById("next");
+  nextBtn.textContent = (current === questions.length - 1) ? "See Result" : "Next";
+  nextBtn.classList.remove("hidden");
+}
+
+// ---------- Next question or final result ----------
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("scoreText").textContent =
+        "You scored " + score + " out of " + questions.length;
+    show("result");
+  }
+}
+
+// ---------- Connect buttons to functions ----------
+document.getElementById("startBtn").onclick = startQuiz;
+document.getElementById("next").onclick = nextQuestion;
+document.getElementById("restart").onclick = function () {
+  show("setup");
+};
+
+</script>
+</body>
+</html>
