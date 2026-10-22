@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ten Questions</title>
+  <style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f4f8;
+  margin: 0;
+}
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+}
+h1 {
+  text-align: center;
+  color: #2c3e50;
+}
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+button {
+  padding: 10px 20px;
+  margin-top: 15px;
+  background-color: #2c7be5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.option {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background-color: #e9ecef;
+  color: black;
+  text-align: left;
+}
+.right {
+  background-color: #28a745;
+  color: white;
+}
+.wrong {
+  background-color: #dc3545;
+  color: white;
+}
+.hidden {
+  display: none;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ten Questions</h1>
+    <!-- Screen 1: choose a topic -->
+    <div id="setup">
+      <p>Choose a topic and answer 10 multiple choice questions.</p>
+      <label for="topic">Topic</label>
+      <select id="topic">
+        <option value="Java">Java Programming</option>
+        <option value="OS">Operating Systems</option>
+        <option value="DBMS">DBMS</option>
+      </select>
+      <button id="startBtn">Start Quiz</button>
+    </div>
+    <!-- Screen 2: the quiz -->
+    <div id="quiz" class="hidden">
+      <p id="count"></p>
+      <h2 id="question"></h2>
+      <div id="options"></div>
+      <p id="explanation"></p>
+      <button id="next" class="hidden">Next</button>
+    </div>
+    <!-- Screen 3: final score -->
+    <div id="result" class="hidden">
+      <h2 id="scoreText"></h2>
+      <button id="restart">Try Another Quiz</button>
+    </div>
+  </div>
+  <script>
+// ---------- Question bank (stored directly in the code) ----------
+// answer = index (0 to 3) of the correct option
+// ---------- Global variables ----------
+var questions = [];   // the 10 questions of the chosen topic
+var current = 0;      // index of the question being shown
+var score = 0;        // number of correct answers
+// ---------- Show only one screen at a time ----------
+function show(id) {
+  var screens = ["setup", "quiz", "result"];
+  for (var i = 0; i < screens.length; i++) {
+    document.getElementById(screens[i]).classList.add("hidden");
+  }
+  document.getElementById(id).classList.remove("hidden");
+}
+// ---------- Shuffle an array (Fisher-Yates) so the order is different every time ----------
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  return arr;
+}
+// ---------- Start the quiz ----------
+function startQuiz() {
+  var topic = document.getElementById("topic").value;
+  questions = shuffle(quizData[topic].slice());  // slice() makes a copy so the original is untouched
+  current = 0;
+  score = 0;
+  showQuestion();
+  show("quiz");
+}
+// ---------- Display one question ----------
+function showQuestion() {
+  var q = questions[current];
+  document.getElementById("count").textContent =
+      "Question " + (current + 1) + " of " + questions.length;
+  document.getElementById("question").textContent = q.q;
+  document.getElementById("explanation").textContent = "";
+  document.getElementById("next").classList.add("hidden");
+  var box = document.getElementById("options");
+  box.innerHTML = "";   // remove old buttons
+  q.options.forEach(function (optionText, index) {
+    var btn = document.createElement("button");
+    btn.textContent = optionText;
+    btn.className = "option";
+    btn.onclick = function () {
+      checkAnswer(index);
+    };
+    box.appendChild(btn);
+  });
+}
+// ---------- Check the chosen answer ----------
+function checkAnswer(chosen) {
+  var q = questions[current];
+  var buttons = document.querySelectorAll(".option");
+  buttons.forEach(function (b) {
+    b.disabled = true;   // stop further clicks
+  });
+  buttons[q.answer].classList.add("right");   // correct answer in green
+  if (chosen === q.answer) {
+    score++;
+  } else {
+    buttons[chosen].classList.add("wrong");   // wrong choice in red
+  }
+  document.getElementById("explanation").textContent = q.explanation;
+  var nextBtn = document.getElementById("next");
+  nextBtn.textContent = (current === questions.length - 1) ? "See Result" : "Next";
+  nextBtn.classList.remove("hidden");
+}
+// ---------- Next question or final result ----------
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("scoreText").textContent =
+        "You scored " + score + " out of " + questions.length;
+    show("result");
+  }
+}
+// ---------- Connect buttons to functions ----------
+document.getElementById("startBtn").onclick = startQuiz;
+document.getElementById("next").onclick = nextQuestion;
+document.getElementById("restart").onclick = function () {
+  show("setup");
+};
+</script>
+</body>
+</html>
